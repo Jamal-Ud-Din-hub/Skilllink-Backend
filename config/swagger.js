@@ -35,34 +35,59 @@ const options = {
         }
       },
       schemas: {
-        User: {
-          type: 'object',
-          properties: {
-            _id: {
-              type: 'string',
-              description: 'User ID'
-            },
-            name: {
-              type: 'string',
-              description: 'User full name'
-            },
-            email: {
-              type: 'string',
-              format: 'email',
-              description: 'User email address'
-            },
-            role: {
-              type: 'string',
-              enum: ['client', 'freelancer'],
-              description: 'User role'
-            },
-            createdAt: {
-              type: 'string',
-              format: 'date-time',
-              description: 'Account creation date'
-            }
-          }
-        },
+                 User: {
+           type: 'object',
+           properties: {
+             _id: {
+               type: 'string',
+               description: 'User ID'
+             },
+             name: {
+               type: 'string',
+               minLength: 2,
+               maxLength: 50,
+               description: 'User full name (2-50 characters)'
+             },
+             email: {
+               type: 'string',
+               format: 'email',
+               description: 'User email address'
+             },
+             role: {
+               type: 'string',
+               enum: ['buyer', 'seller', 'admin'],
+               default: 'buyer',
+               description: 'User role'
+             },
+             avatar: {
+               type: 'string',
+               description: 'User avatar URL'
+             },
+             description: {
+               type: 'string',
+               maxLength: 500,
+               description: 'User description (max 500 characters)'
+             },
+             skills: {
+               type: 'array',
+               items: {
+                 type: 'string'
+               },
+               maxItems: 10,
+               description: 'User skills (max 10 skills)'
+             },
+             createdAt: {
+               type: 'string',
+               format: 'date-time',
+               description: 'Account creation date'
+             },
+             updatedAt: {
+               type: 'string',
+               format: 'date-time',
+               description: 'Last update date'
+             }
+           }
+         },
         Gig: {
           type: 'object',
           properties: {

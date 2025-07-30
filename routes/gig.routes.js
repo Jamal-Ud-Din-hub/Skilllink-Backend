@@ -2,6 +2,7 @@ const router = require('express').Router();
 const controller = require('../controllers/gig.controller');
 const auth = require('../middlewares/auth.middleware');
 const upload = require('../middlewares/upload.middleware');
+const { validateCreateGig, validateUpdateGig, validateGigQuery } = require('../middlewares/validation');
 
 /**
  * @swagger
@@ -67,7 +68,8 @@ const upload = require('../middlewares/upload.middleware');
  *                     pages:
  *                       type: integer
  */
-router.get('/', controller.getGigs);
+// Query gigs with validation
+router.get('/', validateGigQuery, controller.getGigs);
 
 /**
  * @swagger
@@ -103,6 +105,7 @@ router.get('/', controller.getGigs);
  *             schema:
  *               $ref: '#/components/schemas/Error'
  */
+// Get gig by ID (no validation needed for params here)
 router.get('/:id', controller.getGigById);
 
 /**
@@ -182,7 +185,8 @@ router.get('/:id', controller.getGigById);
  *             schema:
  *               $ref: '#/components/schemas/Error'
  */
-router.post('/', auth(['seller']), upload.array('images', 3), controller.createGig);
+// Seller only: create gig with validation
+router.post('/', auth(['seller']), upload.array('images', 3), validateCreateGig, controller.createGig);
 
 /**
  * @swagger
@@ -256,7 +260,8 @@ router.post('/', auth(['seller']), upload.array('images', 3), controller.createG
  *             schema:
  *               $ref: '#/components/schemas/Error'
  */
-router.put('/:id', auth(['seller']), controller.updateGig);
+// Seller only: update gig with validation
+router.put('/:id', auth(['seller']), validateUpdateGig, controller.updateGig);
 
 /**
  * @swagger
@@ -307,6 +312,7 @@ router.put('/:id', auth(['seller']), controller.updateGig);
  *             schema:
  *               $ref: '#/components/schemas/Error'
  */
+// Seller only: delete gig
 router.delete('/:id', auth(['seller']), controller.deleteGig);
 
 module.exports = router;

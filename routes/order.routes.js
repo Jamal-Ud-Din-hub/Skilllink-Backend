@@ -2,6 +2,7 @@ const router = require('express').Router();
 const controller = require('../controllers/order.controller');
 const auth = require('../middlewares/auth.middleware');
 const upload = require('../middlewares/upload.middleware');
+const { validateCreateOrder, validateUpdateOrderStatus, validateOrderQuery, validateDelivery } = require('../middlewares/validation');
 
 /**
  * @swagger
@@ -69,7 +70,7 @@ const upload = require('../middlewares/upload.middleware');
  *             schema:
  *               $ref: '#/components/schemas/Error'
  */
-router.post('/', auth(['buyer']), controller.placeOrder);
+router.post('/', auth(['buyer']), validateCreateOrder, controller.placeOrder);
 
 /**
  * @swagger
@@ -132,7 +133,7 @@ router.post('/', auth(['buyer']), controller.placeOrder);
  *             schema:
  *               $ref: '#/components/schemas/Error'
  */
-router.get('/', auth(), controller.getMyOrders);
+router.get('/', auth(), validateOrderQuery, controller.getMyOrders);
 
 /**
  * @swagger
@@ -209,7 +210,7 @@ router.get('/', auth(), controller.getMyOrders);
  *             schema:
  *               $ref: '#/components/schemas/Error'
  */
-router.patch('/:id/status', auth(), controller.updateStatus);
+router.patch('/:id/status', auth(), validateUpdateOrderStatus, controller.updateStatus);
 
 /**
  * @swagger
@@ -290,6 +291,6 @@ router.patch('/:id/status', auth(), controller.updateStatus);
  *             schema:
  *               $ref: '#/components/schemas/Error'
  */
-router.post('/:id/deliver', auth(['seller']), upload.single('file'), controller.uploadDelivery);
+router.post('/:id/deliver', auth(['seller']), upload.single('file'), validateDelivery, controller.uploadDelivery);
 
 module.exports = router;

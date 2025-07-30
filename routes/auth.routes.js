@@ -1,5 +1,6 @@
 const router = require('express').Router();
 const { register, login } = require('../controllers/auth.controller');
+const { validateRegister, validateLogin } = require('../middlewares/validation');
 
 /**
  * @swagger
@@ -17,11 +18,12 @@ const { register, login } = require('../controllers/auth.controller');
  *               - name
  *               - email
  *               - password
- *               - role
  *             properties:
  *               name:
  *                 type: string
- *                 description: User's full name
+ *                 minLength: 2
+ *                 maxLength: 50
+ *                 description: User's full name (2-50 characters)
  *                 example: "John Doe"
  *               email:
  *                 type: string
@@ -31,13 +33,27 @@ const { register, login } = require('../controllers/auth.controller');
  *               password:
  *                 type: string
  *                 minLength: 6
- *                 description: User's password (minimum 6 characters)
- *                 example: "password123"
+ *                 maxLength: 128
+ *                 description: User's password (6-128 characters, must contain uppercase, lowercase, and number)
+ *                 example: "Password123"
  *               role:
  *                 type: string
- *                 enum: [client, freelancer]
+ *                 enum: [buyer, seller, admin]
+ *                 default: buyer
  *                 description: User's role in the platform
- *                 example: "client"
+ *                 example: "buyer"
+ *               description:
+ *                 type: string
+ *                 maxLength: 500
+ *                 description: User's description (optional, max 500 characters)
+ *                 example: "Experienced web developer"
+ *               skills:
+ *                 type: array
+ *                 items:
+ *                   type: string
+ *                 maxItems: 10
+ *                 description: User's skills (optional, max 10 skills)
+ *                 example: ["JavaScript", "React", "Node.js"]
  *     responses:
  *       201:
  *         description: User registered successfully
@@ -53,21 +69,50 @@ const { register, login } = require('../controllers/auth.controller');
  *                   type: string
  *                   example: "User registered successfully"
  *                 data:
- *                   $ref: '#/components/schemas/User'
+ *                   type: object
+ *                   properties:
+ *                     user:
+ *                       $ref: '#/components/schemas/User'
+ *                     token:
+ *                       type: string
+ *                       description: JWT authentication token
+ *                       example: "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..."
  *       400:
  *         description: Bad request - validation error
  *         content:
  *           application/json:
  *             schema:
- *               $ref: '#/components/schemas/Error'
+ *               type: object
+ *               properties:
+ *                 success:
+ *                   type: boolean
+ *                   example: false
+ *                 message:
+ *                   type: string
+ *                   example: "Validation failed"
+ *                 errors:
+ *                   type: array
+ *                   items:
+ *                     type: string
+ *                   example: ["Name must be at least 2 characters long", "Password must contain at least one lowercase letter, one uppercase letter, and one number"]
  *       409:
  *         description: Email already exists
  *         content:
  *           application/json:
  *             schema:
- *               $ref: '#/components/schemas/Error'
+ *               type: object
+ *               properties:
+ *                 success:
+ *                   type: boolean
+ *                   example: false
+ *                 message:
+ *                   type: string
+ *                   example: "Email already exists"
+ *                 error:
+ *                   type: string
+ *                   example: "A user with this email address already exists"
  */
-router.post('/register', register);
+router.post('/register', validateRegister, register);
 
 /**
  * @swagger
@@ -93,7 +138,7 @@ router.post('/register', register);
  *               password:
  *                 type: string
  *                 description: User's password
- *                 example: "password123"
+ *                 example: "Password123"
  *     responses:
  *       200:
  *         description: Login successful
@@ -117,19 +162,41 @@ router.post('/register', register);
  *                       type: string
  *                       description: JWT authentication token
  *                       example: "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..."
- *       401:
- *         description: Invalid credentials
- *         content:
- *           application/json:
- *             schema:
- *               $ref: '#/components/schemas/Error'
  *       400:
  *         description: Bad request - validation error
  *         content:
  *           application/json:
  *             schema:
- *               $ref: '#/components/schemas/Error'
+ *               type: object
+ *               properties:
+ *                 success:
+ *                   type: boolean
+ *                   example: false
+ *                 message:
+ *                   type: string
+ *                   example: "Validation failed"
+ *                 errors:
+ *                   type: array
+ *                   items:
+ *                     type: string
+ *                   example: ["Please provide a valid email address", "Password is required"]
+ *       401:
+ *         description: Invalid credentials
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 success:
+ *                   type: boolean
+ *                   example: false
+ *                 message:
+ *                   type: string
+ *                   example: "Invalid credentials"
+ *                 error:
+ *                   type: string
+ *                   example: "Email or password is incorrect"
  */
-router.post('/login', login);
+router.post('/login', validateLogin, login);
 
 module.exports = router;
